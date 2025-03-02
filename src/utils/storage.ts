@@ -3,7 +3,9 @@ import { User } from '../types';
 const STORAGE_KEYS = {
   USER: 'sign_language_user',
   AUTH: 'sign_language_auth',
-  REGISTERED_USERS: 'sign_language_registered_users'
+  REGISTERED_USERS: 'sign_language_registered_users',
+  LEARNING_TIME: 'sign_language_learning_time',
+  LESSON_PROGRESS: 'sign_language_lesson_progress'
 };
 
 export const storage = {
@@ -54,6 +56,138 @@ export const storage = {
     } catch (error) {
       console.error('Error parsing registered users:', error);
       return [];
+    }
+  },
+
+  clearAll: () => {
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    localStorage.removeItem(STORAGE_KEYS.AUTH);
+  },
+
+  clearUser: () => {
+    localStorage.removeItem(STORAGE_KEYS.USER);
+  },
+
+  updateStreak: () => {
+    const user = storage.getUser();
+    if (!user) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const lastPractice = user.progress.lastPracticeDate.split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+    if (lastPractice === yesterday) {
+      // Increment streak if user practiced yesterday
+      user.progress.streak += 1;
+    } else if (lastPractice !== today) {
+      // Reset streak if user missed a day
+      user.progress.streak = 1;
+    }
+
+    user.progress.lastPracticeDate = today;
+    storage.setUser(user);
+  },
+
+  updateLearningTime: (timeSpent: number) => {
+    const user = storage.getUser();
+    if (!user) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    let learningTime = {};
+
+    try {
+      const storedTime = localStorage.getItem(STORAGE_KEYS.LEARNING_TIME);
+      learningTime = storedTime ? JSON.parse(storedTime) : {};
+    } catch (error) {
+      console.error('Error parsing learning time:', error);
+    }
+
+    learningTime[today] = (learningTime[today] || 0) + timeSpent;
+    localStorage.setItem(STORAGE_KEYS.LEARNING_TIME, JSON.stringify(learningTime));
+  },
+
+  getDailyLearningTime: () => {
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      const storedTime = localStorage.getItem(STORAGE_KEYS.LEARNING_TIME);
+      const learningTime = storedTime ? JSON.parse(storedTime) : {};
+      return learningTime[today] || 0;
+    } catch (error) {
+      console.error('Error getting daily learning time:', error);
+      return 0;
+    }
+  },
+
+  saveLessonProgress: (userId: string, lessonId: string, progress: { completed: boolean; score?: number }) => {
+    try {
+      const storedProgress = localStorage.getItem(STORAGE_KEYS.LESSON_PROGRESS);
+      const allProgress = storedProgress ? JSON.parse(storedProgress) : {};
+      
+      if (!allProgress[userId]) {
+        allProgress[userId] = {};
+      }
+      
+      allProgress[userId][lessonId] = {
+        ...allProgress[userId][lessonId],
+        ...progress,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem(STORAGE_KEYS.LESSON_PROGRESS, JSON.stringify(allProgress));
+    } catch (error) {
+      console.error('Error saving lesson progress:', error);
+    }
+  },
+
+  getLessonProgress: (userId: string, lessonId: string) => {
+    try {
+      const storedProgress = localStorage.getItem(STORAGE_KEYS.LESSON_PROGRESS);
+      const allProgress = storedProgress ? JSON.parse(storedProgress) : {};
+      return allProgress[userId]?.[lessonId] || { completed: false };
+    } catch (error) {
+      console.error('Error getting lesson progress:', error);
+      return { completed: false };
+    }
+  },
+
+  getAllLessonProgress: (userId: string) => {
+    try {
+      const storedProgress = localStorage.getItem(STORAGE_KEYS.LESSON_PROGRESS);
+      const allProgress = storedProgress ? JSON.parse(storedProgress) : {};
+      return allProgress[userId] || {};
+    } catch (error) {
+      console.error('Error getting all lesson progress:', error);
+      return {};
+    }
+  },
+
+  updateLearningTime: (timeSpent: number) => {
+    const user = storage.getUser();
+    if (!user) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    let learningTime = {};
+
+    try {
+      const storedTime = localStorage.getItem(STORAGE_KEYS.LEARNING_TIME);
+      learningTime = storedTime ? JSON.parse(storedTime) : {};
+    } catch (error) {
+      console.error('Error parsing learning time:', error);
+    }
+
+    learningTime[today] = (learningTime[today] || 0) + timeSpent;
+    localStorage.setItem(STORAGE_KEYS.LEARNING_TIME, JSON.stringify(learningTime));
+  },
+
+  getDailyLearningTime: (): number => {
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      const storedTime = localStorage.getItem(STORAGE_KEYS.LEARNING_TIME);
+      const learningTime = storedTime ? JSON.parse(storedTime) : {};
+      return learningTime[today] || 0;
+    } catch (error) {
+      console.error('Error getting daily learning time:', error);
+      return 0;
     }
   },
 

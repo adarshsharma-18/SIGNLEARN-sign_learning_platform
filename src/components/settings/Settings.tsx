@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../../types';
 import { storage } from '../../utils/storage';
-import { Settings as SettingsIcon, Key, Languages, HelpCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Key, Languages, HelpCircle, Check } from 'lucide-react';
 
 export function Settings() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+  const [showSuccess, setShowSuccess] = useState(false);
   const user = storage.getUser();
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -30,8 +31,11 @@ export function Settings() {
     };
     storage.setUser(updatedUser);
     storage.addRegisteredUser(updatedUser);
-    alert('Profile updated successfully!');
-    navigate('/dashboard');
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigate('/dashboard');
+    }, 2000);
   };
 
   const handlePasswordChange = () => {
@@ -225,6 +229,14 @@ export function Settings() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {showSuccess && (
+        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in-down">
+          <div className="bg-green-500 rounded-full p-1">
+            <Check className="h-4 w-4 text-white" />
+          </div>
+          <p className="font-medium">Changes saved successfully!</p>
+        </div>
+      )}
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>

@@ -13,8 +13,9 @@ export function LessonQuiz({ lesson, onComplete, onClose }: LessonQuizProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
 
-  const questions = lesson.demonstrations.map((demo) => {
-    const questionType = Math.random();
+  const questions = useMemo(() => lesson.demonstrations.map((demo) => {
+    // Randomly select question type once at initialization
+    const questionType = Math.random() < 0.5 ? 'fill-in-blank' : 'gif-to-word';
     const baseQuestion = {
       word: demo.word,
       gifUrl: `/src/assets/gifs/${lesson.category.toLowerCase()}/${demo.word.toLowerCase().replace(/\s+/g, '-')}.gif`,
@@ -28,22 +29,10 @@ export function LessonQuiz({ lesson, onComplete, onClose }: LessonQuizProps) {
       ].sort(() => Math.random() - 0.5),
     };
 
-    if (questionType < 0.33) {
-      return {
-        ...baseQuestion,
-        type: 'fill-in-blank',
-        prompt: `Type the sign word shown in the GIF: _ _ _ _ _`,
-      };
-    } else if (questionType < 0.66) {
-      return {
-        ...baseQuestion,
-        type: 'gif-to-word',
-      };
-    } else {
-      return {
-        ...baseQuestion,
-        type: 'word-to-gif',
-      };
+    return {
+      ...baseQuestion,
+      type: questionType,
+      prompt: questionType === 'fill-in-blank' ? `Type the sign word shown in the GIF: _ _ _ _ _` : 'What sign is being shown in this GIF?'
     }
   });
 
@@ -72,8 +61,18 @@ export function LessonQuiz({ lesson, onComplete, onClose }: LessonQuizProps) {
 
   if (showResult) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl p-8 max-w-md w-full">
+      <div className="fixed inset-0 bg-gray-50 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white shadow rounded-lg overflow-hidden p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Quiz Complete!</h2>
+              <button
+                onClick={onClose}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
           <h2 className="text-2xl font-bold mb-4">Quiz Complete!</h2>
           <p className="text-lg mb-4">
             Your score: {score} out of {questions.length}
@@ -109,6 +108,7 @@ export function LessonQuiz({ lesson, onComplete, onClose }: LessonQuizProps) {
               Close
             </button>
           </div>
+          </div>
         </div>
       </div>
     );
@@ -117,8 +117,19 @@ export function LessonQuiz({ lesson, onComplete, onClose }: LessonQuizProps) {
   const currentQ = questions[currentQuestion];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl p-8 max-w-2xl w-full">
+    <div className="fixed inset-0 bg-gray-50 overflow-y-auto">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white shadow rounded-lg overflow-hidden p-8">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={onClose}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+            <h2 className="text-xl font-semibold text-gray-900">Quiz</h2>
+            <div className="w-6"></div> {/* Spacer for alignment */}
+          </div>
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">
@@ -222,6 +233,7 @@ export function LessonQuiz({ lesson, onComplete, onClose }: LessonQuizProps) {
           >
             {currentQuestion < questions.length - 1 ? 'Next' : 'Finish'}
           </button>
+        </div>
         </div>
       </div>
     </div>

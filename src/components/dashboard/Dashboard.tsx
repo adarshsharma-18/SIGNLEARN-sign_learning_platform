@@ -110,6 +110,25 @@ export function Dashboard() {
     if (!hasCompletedFirstTimeLogin) {
       setShowFirstTimePopup(true);
     }
+
+    // Update streak when component mounts
+    storage.updateStreak();
+
+    // Load saved lesson progress
+    const savedProgress = storage.getAllLessonProgress(user.id);
+    mockLessons.forEach(lesson => {
+      const lessonProgress = savedProgress[lesson.id];
+      if (lessonProgress?.completed) {
+        lesson.completed = true;
+      }
+    });
+
+    // Set up interval to update learning time
+    const interval = setInterval(() => {
+      storage.updateLearningTime(1); // Update every minute
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, [user.id]);
 
   const handleLogout = () => {
@@ -142,6 +161,11 @@ export function Dashboard() {
       const lessonIndex = mockLessons.findIndex(l => l.id === activeLesson.id);
       if (lessonIndex !== -1) {
         mockLessons[lessonIndex].completed = true;
+        // Save lesson progress to local storage
+        storage.saveLessonProgress(user.id, activeLesson.id, {
+          completed: true,
+          score: score
+        });
       }
     }
   };
@@ -200,7 +224,7 @@ export function Dashboard() {
               <Activity className="h-8 w-8 text-green-500" />
               <div className="ml-4">
                 <p className="text-sm text-gray-500">Daily Goal</p>
-                <p className="text-2xl font-semibold">{user.preferences.dailyGoal} min</p>
+                <p className="text-2xl font-semibold">{storage.getDailyLearningTime()} / {user.preferences.dailyGoal} min</p>
               </div>
             </div>
           </div>
