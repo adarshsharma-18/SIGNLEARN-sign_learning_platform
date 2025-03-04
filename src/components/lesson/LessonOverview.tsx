@@ -91,10 +91,10 @@ export function LessonOverview({ lesson, onStartLesson, onBack, onStartQuiz, onP
                     <div className="ml-auto flex items-center">
                       <button
                         onClick={() => handlePlayTopic(index)}
-                        className={`rounded-full ${isCompleted ? "bg-green-500" : "bg-amber-500"} p-2 cursor-pointer transition-colors hover:opacity-90`}
+                        className={`rounded-full ${isCompleted ? "bg-green-500" : "bg-gray-400"} p-2 cursor-pointer transition-colors hover:opacity-90`}
                         aria-label={`Go to ${demo.word}`}
                       >
-                        {isCompleted ? <Check className="h-5 w-5 text-white" /> : <ChevronRight className="h-5 w-5 text-white" />}
+                        <Check className="h-5 w-5 text-white" />
                       </button>
                     </div>
                   </div>

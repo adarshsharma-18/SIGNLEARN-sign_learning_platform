@@ -60,12 +60,13 @@ export const storage = {
   },
 
   clearAll: () => {
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    // Only remove authentication data, preserve learning progress
     localStorage.removeItem(STORAGE_KEYS.AUTH);
   },
 
   clearUser: () => {
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    // Only remove user session data, preserve learning progress
+    localStorage.removeItem(STORAGE_KEYS.AUTH);
   },
 
   updateStreak: () => {
@@ -127,11 +128,23 @@ export const storage = {
         allProgress[userId] = {};
       }
       
-      allProgress[userId][lessonId] = {
-        ...allProgress[userId][lessonId],
-        ...progress,
-        lastUpdated: new Date().toISOString()
-      };
+      // Check if the lesson was already completed
+      const existingProgress = allProgress[userId][lessonId];
+      if (existingProgress?.completed && progress.completed) {
+        // Update only the score and timestamp if lesson was already completed
+        allProgress[userId][lessonId] = {
+          ...existingProgress,
+          score: progress.score !== undefined ? progress.score : existingProgress.score,
+          lastUpdated: new Date().toISOString()
+        };
+      } else {
+        // Save new progress for first-time completion or incomplete lesson
+        allProgress[userId][lessonId] = {
+          ...existingProgress,
+          ...progress,
+          lastUpdated: new Date().toISOString()
+        };
+      }
       
       localStorage.setItem(STORAGE_KEYS.LESSON_PROGRESS, JSON.stringify(allProgress));
     } catch (error) {
@@ -161,6 +174,19 @@ export const storage = {
     }
   },
 
+  initializeProgress: () => {
+    const user = storage.getUser();
+    if (!user) return null;
+    
+    const progress = storage.getAllLessonProgress(user.id);
+    if (Object.keys(progress).length > 0) {
+      return {
+        lessonProgress: progress,
+        userId: user.id
+      };
+    }
+    return null;
+  },
   updateLearningTime: (timeSpent: number) => {
     const user = storage.getUser();
     if (!user) return;

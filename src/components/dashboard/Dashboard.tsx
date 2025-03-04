@@ -103,6 +103,7 @@ export function Dashboard() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showLessonOverview, setShowLessonOverview] = useState(false);
   const [showFirstTimePopup, setShowFirstTimePopup] = useState(false);
+  const [lessons, setLessons] = useState(mockLessons);
 
   useEffect(() => {
     // Check if this is the user's first time logging in
@@ -116,12 +117,11 @@ export function Dashboard() {
 
     // Load saved lesson progress
     const savedProgress = storage.getAllLessonProgress(user.id);
-    mockLessons.forEach(lesson => {
-      const lessonProgress = savedProgress[lesson.id];
-      if (lessonProgress?.completed) {
-        lesson.completed = true;
-      }
-    });
+    const updatedLessons = lessons.map(lesson => ({
+      ...lesson,
+      completed: savedProgress[lesson.id]?.completed || false
+    }));
+    setLessons(updatedLessons);
 
     // Set up interval to update learning time
     const interval = setInterval(() => {
@@ -243,7 +243,7 @@ export function Dashboard() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-xl font-semibold mb-6">Today's Lessons</h2>
           <div className="grid grid-cols-1 gap-6">
-            {mockLessons.map((lesson) => (
+            {lessons.map((lesson) => (
               <div
                 key={lesson.id}
                 className="border rounded-lg p-4 hover:border-indigo-500 transition-colors"
