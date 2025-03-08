@@ -1,13 +1,16 @@
 {
   "name": "sign-language-learning",
   "private": true,
-  "version": "0.0.0",
+  "homepage": "https://adarshsharma-18.github.io/SIGNLEARN-sign_learning_platform/",
+  "version" : "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predepoly":"npm run build",
+    "depoly": "gh-pages -d dist"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
