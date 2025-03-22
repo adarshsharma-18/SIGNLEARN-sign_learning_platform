@@ -1,7 +1,6 @@
 {
   "name": "sign-language-learning",
   "private": true,
-  "homepage": "https://adarshsharma-18.github.io/sign-language-learning/",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
