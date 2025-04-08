@@ -59,11 +59,6 @@ export const storage = {
     }
   },
 
-  clearAll: () => {
-    // Only remove authentication data, preserve learning progress
-    localStorage.removeItem(STORAGE_KEYS.AUTH);
-  },
-
   clearUser: () => {
     // Only remove user session data, preserve learning progress
     localStorage.removeItem(STORAGE_KEYS.AUTH);
