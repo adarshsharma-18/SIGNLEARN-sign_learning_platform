@@ -59,10 +59,7 @@ export const storage = {
     }
   },
 
-  clearUser: () => {
-    // Only remove user session data, preserve learning progress
-    localStorage.removeItem(STORAGE_KEYS.AUTH);
-  },
+ 
 
   updateStreak: () => {
     const user = storage.getUser();
@@ -102,17 +99,7 @@ export const storage = {
     localStorage.setItem(STORAGE_KEYS.LEARNING_TIME, JSON.stringify(learningTime));
   },
 
-  getDailyLearningTime: () => {
-    const today = new Date().toISOString().split('T')[0];
-    try {
-      const storedTime = localStorage.getItem(STORAGE_KEYS.LEARNING_TIME);
-      const learningTime = storedTime ? JSON.parse(storedTime) : {};
-      return learningTime[today] || 0;
-    } catch (error) {
-      console.error('Error getting daily learning time:', error);
-      return 0;
-    }
-  },
+
 
   saveLessonProgress: (userId: string, lessonId: string, progress: { completed: boolean; score?: number }) => {
     try {
@@ -181,23 +168,6 @@ export const storage = {
       };
     }
     return null;
-  },
-  updateLearningTime: (timeSpent: number) => {
-    const user = storage.getUser();
-    if (!user) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    let learningTime = {};
-
-    try {
-      const storedTime = localStorage.getItem(STORAGE_KEYS.LEARNING_TIME);
-      learningTime = storedTime ? JSON.parse(storedTime) : {};
-    } catch (error) {
-      console.error('Error parsing learning time:', error);
-    }
-
-    learningTime[today] = (learningTime[today] || 0) + timeSpent;
-    localStorage.setItem(STORAGE_KEYS.LEARNING_TIME, JSON.stringify(learningTime));
   },
 
   getDailyLearningTime: (): number => {
